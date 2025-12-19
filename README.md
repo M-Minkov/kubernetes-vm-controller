@@ -1,5 +1,7 @@
 # Node Lifecycle Manager
 
+For a quick way to run it locally, see [README.run-local.md](README.run-local.md).
+
 Automates node lifecycle management in AKS clusters. Monitors node health, drains bad nodes, scales your cluster, and sends alerts when things go wrong.
 
 ## What It Does
