@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-lifecycle-config
+  namespace: node-lifecycle-system
+data:
+  config.yaml: |
+    azure:
+      subscriptionId: "a0f13338-dc0f-465b-9bc0-af604cf890ac"
+      resourceGroup: "node-lifecycle-rg"
+      clusterName: "test-cluster"
+      useManagedIdentity: true
+    
+    controller:
+      reconcileInterval: 30s
+      drainTimeout: 5m
+      drainGracePeriod: 30s
+      ignoreDaemonSets: true
+      deleteLocalData: false
+      maxConcurrentDrains: 1
+    
+    healthChecks:
+      interval: 30s
+      unhealthyThreshold: 3
+      checks:
+        - node-condition
+        - disk-pressure
+        - memory-pressure
+        - pid-pressure
+    
+    autoscaling:
+      enabled: true
+      scaleUpThreshold: 0.7
+      scaleDownThreshold: 0.5
+      scaleUpCooldown: 30s
+      scaleDownCooldown: 10s
+      minNodes: 1
+      maxNodes: 2
+      nodePools:
+        - agentpool
+    
+    alerting:
+      enabled: false
+      slackWebhookUrl: ""
+      slackChannel: "#alerts"
+    
+    metrics:
+      port: 8080

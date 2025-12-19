@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-lifecycle-controller
+  namespace: node-lifecycle-system
+  labels:
+    app: node-lifecycle-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-lifecycle-controller
+  template:
+    metadata:
+      labels:
+        app: node-lifecycle-controller
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: node-lifecycle-controller
+      containers:
+      - name: controller
+        image: nlmregistry1765969557.azurecr.io/node-lifecycle-controller:latest
+        args:
+        - --config=/etc/node-lifecycle/config.yaml
+        - --metrics-addr=:8080
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: config
+          mountPath: /etc/node-lifecycle
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: node-lifecycle-config
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-lifecycle-controller
+  namespace: node-lifecycle-system
+  labels:
+    app: node-lifecycle-controller
+spec:
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: node-lifecycle-controller

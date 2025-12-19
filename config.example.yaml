@@ -1,0 +1,39 @@
+azure:
+  subscriptionId: "your-subscription-id"
+  resourceGroup: "your-resource-group"
+  clusterName: "your-aks-cluster"
+  useManagedIdentity: true
+
+healthChecks:
+  interval: 30s
+  unhealthyThreshold: 3
+  checks:
+    - node-condition
+    - disk-pressure
+    - memory-pressure
+    - pid-pressure
+
+controller:
+  reconcileInterval: 60s
+  drainTimeout: 5m
+  drainGracePeriod: 30s
+  ignoreDaemonSets: true
+  deleteLocalData: false
+  maxConcurrentDrains: 1
+
+autoscaling:
+  enabled: true
+  scaleUpThreshold: 0.8
+  scaleDownThreshold: 0.3
+  scaleUpCooldown: 5m
+  scaleDownCooldown: 10m
+  minNodes: 2
+  maxNodes: 10
+  nodePools:
+    - agentpool
+
+alerting:
+  enabled: true
+  slackWebhookUrl: "https://hooks.slack.com/services/xxx/yyy/zzz"
+  slackChannel: "#k8s-alerts"
+  webhookUrls: []
